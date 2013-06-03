@@ -44,7 +44,7 @@ the flow of analysis in Section \ref{sec:quickstart} for both isoform and gene-l
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.6\textwidth]{CufflinksIsoNgUGC1_Ig.pdf}
+\includegraphics[width=0.6\textwidth]{PlotExample.pdf}
 \label{fig:GouldNg}
 \caption{Empirical variance vs. mean for
 each isoform profiled in the ESCs vs iPSCs experiment detailed in
