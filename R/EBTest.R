@@ -1,5 +1,5 @@
 EBTest <-
-function(Data,NgVector=NULL,Conditions, sizeFactors, maxround, Pool=F, NumBin=1000,ApproxVal=10^-10, Alpha=NULL, Beta=NULL,PInput=NULL,RInput=NULL,PoolLower=.25, PoolUpper=.75,Print=T)
+function(Data,NgVector=NULL,Conditions, sizeFactors, maxround, Pool=F, NumBin=1000,ApproxVal=10^-10, Alpha=NULL, Beta=NULL,PInput=NULL,RInput=NULL,PoolLower=.25, PoolUpper=.75,Print=T, Qtrm=.75,QtrmCut=10)
 {
 	if(!is.factor(Conditions))Conditions=as.factor(Conditions)
 	if(is.null(rownames(Data)))stop("Please add gene/isoform names to the data matrix")
@@ -9,11 +9,33 @@ function(Data,NgVector=NULL,Conditions, sizeFactors, maxround, Pool=F, NumBin=10
 	if(length(sizeFactors)!=length(Data) &  length(sizeFactors)!=ncol(Data))
 		stop("The number of library size factors is not the same as the number of samples!")		
 	
+	Conditions=as.factor(Conditions)
 	Vect5End=Vect3End=CI=CIthre=tau=NULL
 	Dataraw=Data
-	AllZeroNames=which(rowMeans(Data)==0)
-	NotAllZeroNames=which(rowMeans(Data)>0)
-	if(length(AllZeroNames)>0 & Print==T) message("Remove transcripts with all zero \n")
+
+	#Normalized
+	DataNorm=GetNormalizedMat(Data, sizeFactors)
+	Levels=levels(as.factor(Conditions))
+
+	# Dixon Statistics
+#	library(outliers)
+# normalized matrix for each condition
+#	matC=sapply(1:length(Levels),function(i)DataNorm[,which(Conditions==Levels[i])])
+# run dixon test for each isoform within condition
+#	DixonP=sapply(1:length(matC),function(j)
+#	apply(DataNorm,1,function(i){
+#		  if(mean(i)==0)out=NA
+#				  else out=dixon.test(i)$p.value
+#						    out}))
+
+
+	QuantileFor0=apply(DataNorm,1,function(i)quantile(i,Qtrm))
+	AllZeroNames=which(QuantileFor0<=QtrmCut)
+	NotAllZeroNames=which(QuantileFor0>QtrmCut)
+	if(length(AllZeroNames)>0 & Print==T)
+					    cat(paste0("Removing transcripts with ",Qtrm*100,
+							    " th quantile < = ",QtrmCut," \n"))
+	
 	Data=Data[NotAllZeroNames,]
 	if(!is.null(NgVector))NgVector=NgVector[NotAllZeroNames]
 	if(length(sizeFactors)==length(Data))sizeFactors=sizeFactors[NotAllZeroNames,]

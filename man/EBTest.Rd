@@ -11,7 +11,7 @@ Base on the assumption of NB-Beta Empirical Bayes model, the EM algorithm is use
 EBTest(Data, NgVector = NULL, Conditions, sizeFactors, maxround, 
 	Pool = F, NumBin = 1000, ApproxVal = 10^-10, Alpha = NULL, 
 	Beta = NULL, PInput = NULL, RInput = NULL, 
-	PoolLower = .25, PoolUpper = .75, Print = T)
+	PoolLower = .25, PoolUpper = .75, Print = T, Qtrm = .75,QtrmCut=10)
 }
 \arguments{
 
@@ -35,6 +35,11 @@ We use the cross condition variance estimations for the candidate genes and the 
 
 \item{Alpha, Beta, PInput, RInput}{If the parameters are known and the user doesn't want to estimate them from the data, user could specify them here.}
 \item{Print}{Whether print the elapsed-time while running the test.}
+\item{Qtrm, QtrmCut}{
+Transcripts with Qtrm th quantile < = QtrmCut  will be removed before testing. The default value is Qtrm = 0.75 and QtrmCut=10.
+By default setting, transcripts that have >75\% of the samples with expression less than 10
+won't be tested.
+}
 }
 
 \details{For each transcript gi within condition, the model assumes:
