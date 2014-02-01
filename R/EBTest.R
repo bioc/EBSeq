@@ -34,8 +34,9 @@ function(Data,NgVector=NULL,Conditions, sizeFactors, maxround, Pool=F, NumBin=10
 	NotAllZeroNames=which(QuantileFor0>QtrmCut)
 	if(length(AllZeroNames)>0 & Print==T)
 					    cat(paste0("Removing transcripts with ",Qtrm*100,
-							    " th quantile < = ",QtrmCut," \n"))
-	
+							    " th quantile < = ",QtrmCut," \n",
+									length(NotAllZeroNames),"transcripts will be tested"))
+	if(length(NotAllZeroNames)==0)stop("0 transcript passed")
 	Data=Data[NotAllZeroNames,]
 	if(!is.null(NgVector))NgVector=NgVector[NotAllZeroNames]
 	if(length(sizeFactors)==length(Data))sizeFactors=sizeFactors[NotAllZeroNames,]
