@@ -1,5 +1,5 @@
 EBMultiTest <-
-function(Data,NgVector=NULL,Conditions,AllParti=NULL, sizeFactors, maxround,  Pool=F, NumBin=1000, ApproxVal=10^-10,PoolLower=.25, PoolUpper=.75,Print=T)
+function(Data,NgVector=NULL,Conditions,AllParti=NULL, sizeFactors, maxround,  Pool=F, NumBin=1000, ApproxVal=10^-10,PoolLower=.25, PoolUpper=.75,Print=T,Qtrm=.75,QtrmCut=10)
 {
  if(!is.factor(Conditions))Conditions=as.factor(Conditions)
  if(is.null(rownames(Data)))stop("Please add gene/isoform names to the data matrix")
@@ -12,10 +12,23 @@ function(Data,NgVector=NULL,Conditions,AllParti=NULL, sizeFactors, maxround,  Po
 
 	tau=CI=CIthre=NULL
 	Dataraw=Data
-  AllZeroNames=which(rowMeans(Data)==0)
-	NotAllZeroNames=which(rowMeans(Data)>0)
-	if(length(AllZeroNames)>0 & Print==T) message("Remove transcripts with all zero \n")
+  
+	
+	#Normalized
+	DataNorm=GetNormalizedMat(Data, sizeFactors)
+
+	
+
+	QuantileFor0=apply(DataNorm,1,function(i)quantile(i,Qtrm))
+	AllZeroNames=which(QuantileFor0<=QtrmCut)
+	NotAllZeroNames=which(QuantileFor0>QtrmCut)
+	if(length(AllZeroNames)>0 & Print==T)
+					    cat(paste0("Removing transcripts with ",Qtrm*100,
+							    " th quantile < = ",QtrmCut," \n",
+									length(NotAllZeroNames),"transcripts will be tested"))
+	if(length(NotAllZeroNames)==0)stop("0 transcript passed")
 	Data=Data[NotAllZeroNames,]
+	
 	if(!is.null(NgVector))NgVector=NgVector[NotAllZeroNames]
 	if(is.null(NgVector))NgVector=rep(1,nrow(Data))
 

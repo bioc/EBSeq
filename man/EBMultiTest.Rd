@@ -10,7 +10,7 @@ of interested patterns in a multiple condition study
 \usage{
 EBMultiTest(Data, NgVector = NULL, Conditions, AllParti = NULL, 
 	sizeFactors, maxround, Pool = F, NumBin = 1000, 
-	ApproxVal=10^-10, PoolLower=.25, PoolUpper = .75, Print=T)
+	ApproxVal=10^-10, PoolLower=.25, PoolUpper = .75, Print=T,Qtrm=.75,QtrmCut=10)
 }
 \arguments{
 
@@ -43,7 +43,14 @@ We use the cross condition variance estimations for the candidate genes and the 
 \item{ApproxVal}{The variances of the transcripts with mean < var will be approximated as mean/(1-ApproxVal).}
 
 \item{Print}{Whether print the elapsed-time while running the test.}
+
+\item{Qtrm, QtrmCut}{
+Transcripts with Qtrm th quantile < = QtrmCut  will be removed before testing. The default value is Qtrm = 0.75 and QtrmCut=10.
+By default setting, transcripts that have >75\% of the samples with expression less than 10
+won't be tested.
 }
+}
+
 
 \value{
 \item{Alpha}{Fitted parameter alpha of the prior beta distribution. Rows are the values for each iteration.}
