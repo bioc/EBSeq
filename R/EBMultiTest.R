@@ -3,6 +3,7 @@ function(Data,NgVector=NULL,Conditions,AllParti=NULL, sizeFactors, maxround,  Po
 {
  if(!is.factor(Conditions))Conditions=as.factor(Conditions)
  if(is.null(rownames(Data)))stop("Please add gene/isoform names to the data matrix")
+  if(!is.matrix(Data))stop("The input Data is not a matrix")
  if(length(Conditions)!=ncol(Data))stop("The number of conditions is not the same as the number of samples! ")
  if(nlevels(Conditions)==2)stop("Only 2 conditions - Please use EBTest() function")
  if(nlevels(Conditions)<2)stop("Less than 2 conditions - Please check your input")

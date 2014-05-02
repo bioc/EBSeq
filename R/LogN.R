@@ -21,6 +21,21 @@ function(Input, InputSP, EmpiricalR, EmpiricalRSP, NumOfEachGroup, AlphaIn, Beta
 		z.list=PIn*F1Mdf/(PIn*F1Mdf+(1-PIn)*F0Mdf)
 		zNaNName=names(z.list)[is.na(z.list)]
 		zGood=which(!is.na(z.list))
+		if(length(zGood)==0){
+		#Min=min(min(F0Log[which(F0Log!=-Inf)]), 
+		#	min(F1Log[which(F1Log!=-Inf)]))
+		tmpMat=cbind(F0Log,F1Log)
+		tmpMean=apply(tmpMat,1,mean)
+		F0LogMdf=F0Log-tmpMean
+		F1LogMdf=F1Log-tmpMean
+		F0Mdf=exp(F0LogMdf)
+		F1Mdf=exp(F1LogMdf)
+
+		z.list=PIn*F1Mdf/(PIn*F1Mdf+(1-PIn)*F0Mdf)
+		zNaNName=names(z.list)[is.na(z.list)]
+		zGood=which(!is.na(z.list))
+		
+		}
 		###Update P
         #PFromZ=sapply(1:NoneZeroLength,function(i) sum(z.list[[i]])/length(z.list[[i]]))
         PFromZ=sum(z.list[zGood])/length(z.list[zGood])
