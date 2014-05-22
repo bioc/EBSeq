@@ -19,7 +19,7 @@ LazyLoad: \tab yes\cr
 }
 }
 \author{
-Ning Leng
+Ning Leng, Christina Kendziorski
 
 Maintainer: Ning Leng  <nleng@wisc.edu>
 }

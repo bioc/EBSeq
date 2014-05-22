@@ -177,8 +177,8 @@ library(EBSeq)
 \subsubsection{Required input}
 \label{sec:startgenedeinput}
 \begin{flushleft}
-{\bf Data}:  The object \verb+Data+ should be a $G-by-S$ matrix containing the expression values for each gene and each lane (sample),
-where $G$ is the number of genes and $S$ is the number of lanes. These
+{\bf Data}:  The object \verb+Data+ should be a $G-by-S$ matrix containing the expression values for each gene and each sample,
+where $G$ is the number of genes and $S$ is the number of samples. These
 values should exhibit raw counts, without normalization
 across samples. Counts of this nature may be obtained from RSEM \cite{Li11b},
 Cufflinks \cite{Trapnell12}, or a similar approach.
@@ -217,12 +217,12 @@ Sizes=MedianNorm(GeneMat)
 The function \verb+EBTest+ is used to detect DE genes. 
 For gene-level data, we don't need to specify the parameter 
 \verb+NgVector+ since there are no differences in $I_g$ structure among the different genes.
-Here, we simulated the first five lanes to be in condition 1 and the other five in condition 2, so define: 
+Here, we simulated the first five samples to be in condition 1 and the other five in condition 2, so define: 
 
 \verb+Conditions=as.factor(rep(c("C1","C2"),each=5))+
 
-\noindent \verb+sizeFactors+ is used to define the library size factor of each lane. 
-It could be obtained by summing up the total number of reads within each lane, 
+\noindent \verb+sizeFactors+ is used to define the library size factor of each sample. 
+It could be obtained by summing up the total number of reads within each sample, 
 Median Normalization \citep{Anders10},
 scaling normalization \citep{Robinson10}, Upper-Quantile Normalization \cite{Bullard10}, 
 or some other such approach.
@@ -258,8 +258,8 @@ str(DEfound)
 \label{sec:startisodeinput}
 
 \begin{flushleft}
-{\bf Data}:   The object \verb+Data+ should be a $I-by-S$ matrix containing the expression values for each isoform and each lane,
-where $I$ is the number of isoforms and $S$ is the number of lanes. As in the gene-level analysis, these values should exhibit raw data, without normalization
+{\bf Data}:   The object \verb+Data+ should be a $I-by-S$ matrix containing the expression values for each isoform and each sample,
+where $I$ is the number of isoforms and $S$ is the number of sample. As in the gene-level analysis, these values should exhibit raw data, without normalization
 across samples.
 
 \vspace{5 mm}
@@ -1043,6 +1043,9 @@ These two thresholds can be changed in EBTest function.
 We found that low expressed genes are more easily to be affected by noises.
 Removing these genes prior to downstream analyses can improve the
 model fitting and reduce impacts of noisy genes (e.g. genes with outliers).
+
+2014-5-22: In EBSeq 1.5.2, numerical approximations are implemented to deal with
+underflow. The underflow is likely due to large number of samples.
 \pagebreak
 \bibliographystyle{plain}
 \bibliography{lengetal}
