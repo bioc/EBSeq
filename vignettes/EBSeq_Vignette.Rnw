@@ -17,13 +17,13 @@
 \section{Introduction}
 EBSeq may be used to identify differentially expressed (DE)
 genes and isoforms in an RNA-Seq experiment. As detailed in
-Leng {\it et al.}, 2012 \cite{Leng12}, 
+Leng {\it et al.}, 2013 \cite{Leng13}, 
 EBSeq is an empirical Bayesian approach that models a number of features
 observed in RNA-seq data. Importantly, for isoform level inference,
 EBSeq directly accommodates isoform expression estimation uncertainty by
 modeling the differential variability observed in distinct groups of isoforms.
 Consider Figure 1, where we have plotted variance against mean
-for all isoforms using RNA-Seq expression data from Leng {\it et al.}, 2012 \cite{Leng12}.
+for all isoforms using RNA-Seq expression data from Leng {\it et al.}, 2013 \cite{Leng13}.
 Also shown is the fit within three sub-groups of isoforms defined
 by the number of constituent isoforms of the parent gene.
 An isoform of gene $g$ is assigned to the $I_g=k$ group, where $k=1,2,3$,
@@ -37,8 +37,8 @@ identifying isoforms in the $I_g=1$ group (since the true variances in that grou
 lower, on average, than that derived from the full collection of isoforms) as well as increased
 false discoveries in the $I_g=2$ and $I_g=3$ groups (since the true variances are higher, on average,
 than those derived from the full collection). EBSeq directly models differential variability
-as a function of $I_g$ providing a powerful approach for isoform level inference. As shown in Leng {\it et al.}, 2012
-\cite{Leng12}, the model is also useful for identifying DE genes.
+as a function of $I_g$ providing a powerful approach for isoform level inference. As shown in Leng {\it et al.}, 2013
+\cite{Leng13}, the model is also useful for identifying DE genes.
 We will briefly detail the model in Section \ref{sec:model} and then describe
 the flow of analysis in Section \ref{sec:quickstart} for both isoform and gene-level inference.
 
@@ -48,7 +48,7 @@ the flow of analysis in Section \ref{sec:quickstart} for both isoform and gene-l
 \label{fig:GouldNg}
 \caption{Empirical variance vs. mean for
 each isoform profiled in the ESCs vs iPSCs experiment detailed in
-the Case Study section of Leng {\it et al.}, 2012 \cite{Leng12}.
+the Case Study section of Leng {\it et al.}, 2013 \cite{Leng13}.
 A spline fit to all isoforms is shown in red with splines fit within the $I_g=1$, $I_g=2$, and $I_g=3$ isoform groups
 shown in yellow, pink, and green, respectively.}
 \end{figure}
@@ -523,7 +523,7 @@ than 0.01.
 
 \subsubsection{Checking the model fit and other diagnostics}
 \label{sec:detailedgenedeplot}
-As noted in Leng {\it et al.}, 2012 \cite{Leng12}, EBSeq relies on parametric assumptions that should
+As noted in Leng {\it et al.}, 2013 \cite{Leng13}, EBSeq relies on parametric assumptions that should
 be checked following each analysis.
 The \verb+QQP+ function may be used to assess prior assumptions. 
 In practice, \verb+QQP+ generates the Q-Q plot of the empirical $q$'s 
@@ -668,7 +668,7 @@ In practice, we require changes less than $10^{-3}$ to declare convergence.
 
 \subsubsection{Checking the model fit and other diagnostics}
 \label{sec:detailedisodeplot}
-In Leng {\it et al.}, 2012\citep{Leng12}, we showed the mean-variance differences across different 
+In Leng {\it et al.}, 2013\citep{Leng13}, we showed the mean-variance differences across different 
 isoform groups on multiple data sets. 
 In practice, if it is of interest to check differences among 
 isoform groups defined by truncated $I_g$ (such as those shown here
