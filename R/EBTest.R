@@ -230,7 +230,8 @@ function(Data,NgVector=NULL,Conditions, sizeFactors, maxround, Pool=F, NumBin=10
 	
 	
 	MeanSP[[lv]]=rowMeans(DataListSP.dvd[[lv]])
-	
+	names(MeanSP[[lv]])=rownames(DataListSP[[lv]])
+		
 	if(length(sizeFactors)==ncol(Data))PrePareVar=sapply(1:ncol( DataListSP[[lv]]),function(i)( DataListSP[[lv]][,i]- SizeFSP[[lv]][i]*MeanSP[[lv]])^2 /SizeFSP[[lv]][i])
 	if(length(sizeFactors)==length(Data))PrePareVar=sapply(1:ncol( DataListSP[[lv]]),function(i)( DataListSP[[lv]][,i]- SizeFSP[[lv]][,i]*MeanSP[[lv]])^2 /SizeFSP[[lv]][,i])
 
