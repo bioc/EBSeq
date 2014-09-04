@@ -26,7 +26,7 @@ function(Data,NgVector=NULL,Conditions,AllParti=NULL, sizeFactors, maxround,  Po
 	if(length(AllZeroNames)>0 & Print==T)
 					    cat(paste0("Removing transcripts with ",Qtrm*100,
 							    " th quantile < = ",QtrmCut," \n",
-									length(NotAllZeroNames),"transcripts will be tested"))
+									length(NotAllZeroNames)," transcripts will be tested \n"))
 	if(length(NotAllZeroNames)==0)stop("0 transcript passed")
 	Data=Data[NotAllZeroNames,]
 	
@@ -371,18 +371,21 @@ if (length(AllNA)>0){
 		DataListSPNotInWithZ[[lv]] = matrix(DataListSP[[lv]][AllNA.Ngorder,],nrow=length(AllNA.Ngorder))
 		RListSPNotInWithZ[[lv]]=matrix(R.NotIn[,Conditions==levels(Conditions)[lv]],nrow=length(AllNA.Ngorder))
 	}
+
 	FListNA=sapply(1:nrow(AllParti),function(i)sapply(1:nlevels(as.factor(AllParti[i,])),
 		        function(j)f0(do.call(cbind, DataListSPNotInWithZ[AllParti[i,]==j]),AlphaIn, BetaIn,
                 do.call(cbind,RListSPNotInWithZ[AllParti[i,]==j]), NumOfEachGroupNA, log=T)),
 				                       simplify=F)
-	FPartiLogNA=sapply(FListNA,rowSums)
+	for(ii in 1:length(FListNA))
+		FListNA[[ii]]=matrix(FListNA[[ii]],nrow=length(AllNA.Ngorder))
+	FPartiLogNA=matrix(sapply(FListNA,rowSums),nrow=length(AllNA.Ngorder))
 	FMatNA=exp(FPartiLogNA+600)
 	
 	rownames(FMatNA)=rownames(DataListNotIn.unlistWithZ)
 	PMatNA=matrix(rep(1,nrow(DataListNotIn.unlistWithZ)),ncol=1)%*%matrix(PIn,nrow=1)
-	FmultiPNA=FMatNA*PMatNA
-    DenomNA=rowSums(FmultiPNA)
-	ZEachNA=apply(FmultiPNA,2,function(i)i/DenomNA)
+	FmultiPNA=matrix(FMatNA*PMatNA,nrow=length(AllNA.Ngorder))
+  DenomNA=rowSums(FmultiPNA)
+	ZEachNA=matrix(apply(FmultiPNA,2,function(i)i/DenomNA),nrow=length(AllNA.Ngorder))
 
 	rownames(ZEachNA)=IsoNamesIn[AllNA.Ngorder]
 

@@ -10,7 +10,7 @@ function(Input, InputSP, EmpiricalR, EmpiricalRSP, NumOfEachGroup, AlphaIn, Beta
 					  simplify=F) 
 		FPartiLog=sapply(FList,rowSums)
 		FMat=exp(FPartiLog+600)
-		rownames(FMat)=rownames(Input)
+		rownames(FMat)=rownames(FPartiLog)=rownames(Input)
         #Get z
 		#Use data.list in logfunction
         PInMat=matrix(rep(1,nrow(Input)),ncol=1)%*%matrix(PIn,nrow=1)
@@ -23,6 +23,31 @@ function(Input, InputSP, EmpiricalR, EmpiricalRSP, NumOfEachGroup, AlphaIn, Beta
 		zNaNMore=rownames(LF)[which(is.na(rowSums(LF)))]
 		zNaNName=unique(c(zNaNName1,zNaNMore))
 		zGood=which(!rownames(LF)%in%zNaNName)
+
+
+		if(length(zGood)==0){
+		#Min=min(min(F0Log[which(F0Log!=-Inf)]), 
+		#	min(F1Log[which(F1Log!=-Inf)]))
+		tmpMat=FPartiLog
+		tmpMean=apply(tmpMat,1,mean)
+		FLogMdf=FPartiLog-tmpMean
+		FMdf=exp(FLogMdf)
+
+		FmultiPMdf=FMdf*PInMat
+		DenomMdf=rowSums(FmultiPMdf)
+		ZEach=apply(FmultiPMdf,2,function(i)i/DenomMdf)
+		zNaNName1Mdf=names(DenomMdf)[is.na(DenomMdf)]
+		# other NAs in LikeFun
+		LFMdf=ZEach*(log(FmultiPMdf))
+		zNaNMoreMdf=rownames(LFMdf)[which(is.na(rowSums(LFMdf)))]
+		zNaNNameMdf=unique(c(zNaNName1Mdf,zNaNMoreMdf))
+		zGood=which(!rownames(LFMdf)%in%zNaNNameMdf)
+
+
+
+	
+		}
+
 		ZEachGood=ZEach[zGood,]
 		###Update P
         PFromZ=colSums(ZEach[zGood,])/length(zGood)

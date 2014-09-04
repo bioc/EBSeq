@@ -6,7 +6,14 @@ We found that low expressed genes are more easily to be affected by noises.
 Removing these genes prior to downstream analyses can improve the 
 model fitting and reduce impacts of noisy genes (e.g. genes with outliers).
 
-2014-5-22: In EBSeq 1.5.2, numerical approximations are implemented to deal with
+2014-5-22: In EBSeq 1.5.2, an extra numerical approximation step is 
+implemented in EBTest() function to avoid
 underflow. The underflow is likely due to large number of samples.
 
 2014-6-5: In EBSeq 1.5.3, a bug is fixed. The bug may generate NA FC estimates when there are no replicates.
+
+2014-9-4: In EBSeq 1.5.4, an extra numerical approximation step is implemented 
+in EBMultiTest() function to avoid
+underflow. The underflow is likely due to large number of samples.
+A bug in EBMultiTest() is fixed. The bug will cause error when there is
+exactly 1 gene/isoform that needs numerical approximation.
