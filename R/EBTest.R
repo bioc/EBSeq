@@ -1,5 +1,5 @@
 EBTest <-
-function(Data,NgVector=NULL,Conditions, sizeFactors, maxround, Pool=F, NumBin=1000,ApproxVal=10^-10, Alpha=NULL, Beta=NULL,PInput=NULL,RInput=NULL,PoolLower=.25, PoolUpper=.75,Print=T, Qtrm=.75,QtrmCut=10)
+function(Data,NgVector=NULL,Conditions, sizeFactors, maxround, Pool=F, NumBin=1000,ApproxVal=10^-10, Alpha=NULL, Beta=NULL,PInput=NULL,RInput=NULL,PoolLower=.25, PoolUpper=.75,Print=T, Qtrm=1,QtrmCut=0)
 {
 	if(!is.factor(Conditions))Conditions=as.factor(Conditions)
 	if(is.null(rownames(Data)))stop("Please add gene/isoform names to the data matrix")
@@ -587,6 +587,6 @@ Result=list(Alpha=UpdateAlpha,Beta=UpdateBeta,P=UpdateP,
 			C2EstVar=RealName.C2VarList, PoolVar=RealName.PoolVarList , 
 			DataList=RealName.DataList,PPDE=AllZ,f0=AllF0, f1=AllF1,
 			AllZeroIndex=AllZeroNames,PPMat=PPMatNZ, PPMatWith0=PPMat,
-			ConditionOrder=CondOut, Conditions=Conditions)
+			ConditionOrder=CondOut, Conditions=Conditions, DataNorm=DataNorm)
 }
 

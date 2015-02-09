@@ -11,7 +11,7 @@ Base on the assumption of NB-Beta Empirical Bayes model, the EM algorithm is use
 EBTest(Data, NgVector = NULL, Conditions, sizeFactors, maxround, 
 	Pool = F, NumBin = 1000, ApproxVal = 10^-10, Alpha = NULL, 
 	Beta = NULL, PInput = NULL, RInput = NULL, 
-	PoolLower = .25, PoolUpper = .75, Print = T, Qtrm = .75,QtrmCut=10)
+	PoolLower = .25, PoolUpper = .75, Print = T, Qtrm = 1,QtrmCut=0)
 }
 \arguments{
 
@@ -36,8 +36,8 @@ We use the cross condition variance estimations for the candidate genes and the 
 \item{Alpha, Beta, PInput, RInput}{If the parameters are known and the user doesn't want to estimate them from the data, user could specify them here.}
 \item{Print}{Whether print the elapsed-time while running the test.}
 \item{Qtrm, QtrmCut}{
-Transcripts with Qtrm th quantile < = QtrmCut  will be removed before testing. The default value is Qtrm = 0.75 and QtrmCut=10.
-By default setting, transcripts that have >75\% of the samples with expression less than 10
+Transcripts with Qtrm th quantile < = QtrmCut  will be removed before testing. The default value is Qtrm = 1 and QtrmCut=0.
+By default setting, transcripts with all 0's 
 won't be tested.
 }
 }
@@ -77,6 +77,7 @@ Transcripts with expression 0 for all samples are shown as PP(EE) = PP(DE) = NA 
 The transcript order is exactly the same as the order of the input data.}
 \item{ConditionOrder}{The condition assignment for C1Mean, C2Mean, etc.}
 \item{Conditions}{The input conditions.}
+\item{DataNorm}{Normalized expression matrix.}
 }
 \references{
 Ning Leng, John A. Dawson, James A. Thomson, Victor Ruotti, Anna I. Rissman, Bart M.G. Smits, Jill D. Haag, Michael N. Gould, Ron M. Stewart, and Christina Kendziorski. EBSeq: An empirical Bayes hierarchical model for inference in RNA-seq experiments. Bioinformatics (2013)

@@ -5,11 +5,8 @@ str(GeneMat)
 Sizes=MedianNorm(GeneMat)
 EBOut=EBTest(Data=GeneMat,
 			 Conditions=as.factor(rep(c("C1","C2"),each=5)),sizeFactors=Sizes, maxround=5)
-PP=GetPPMat(EBOut)
-str(PP)
-head(PP)
-DEfound=rownames(PP)[which(PP[,"PPDE"]>=.95)]
-str(DEfound)
+DEOut=GetDEResults(EBOut)
+str(DEOut)
 #3.2
 data(IsoList)
 str(IsoList)
@@ -23,10 +20,7 @@ IsoNgTrun=NgList$IsoformNgTrun
 IsoNgTrun[c(1:3,201:203,601:603)]
 IsoEBOut=EBTest(Data=IsoMat, NgVector=IsoNgTrun,
 				Conditions=as.factor(rep(c("C1","C2"),each=5)),sizeFactors=IsoSizes, maxround=5)
-IsoPP=GetPPMat(IsoEBOut)
-str(IsoPP)
-head(IsoPP)
-IsoDE=rownames(IsoPP)[which(IsoPP[,"PPDE"]>=.95)]
+IsoDE=GetDEResults(IsoEBOut)
 str(IsoDE)
 #3.3
 data(MultiGeneMat)
@@ -73,11 +67,7 @@ str(GeneMat)
 Sizes=MedianNorm(GeneMat)
 EBOut=EBTest(Data=GeneMat,
 			 Conditions=as.factor(rep(c("C1","C2"),each=5)),sizeFactors=Sizes, maxround=5)
-PP=GetPPMat(EBOut)
-str(PP)
-head(PP)
-DEfound=rownames(PP)[which(PP[,"PPDE"]>=.95)]
-str(DEfound)
+DEOut=GetDEResults(EBOut)
 EBOut$Alpha
 EBOut$Beta
 EBOut$P
@@ -102,9 +92,7 @@ IsoNgTrun=NgList$IsoformNgTrun
 IsoNgTrun[c(1:3,201:203,601:603)]
 IsoEBOut=EBTest(Data=IsoMat, NgVector=IsoNgTrun,
 				Conditions=as.factor(rep(c("C1","C2"),each=5)),sizeFactors=IsoSizes, maxround=5)
-IsoPP=GetPPMat(IsoEBOut)
-str(IsoPP)
-IsoDE=rownames(IsoPP)[which(IsoPP[,"PPDE"]>=.95)]
+IsoDE=GetDEResults(IsoEBOut)
 str(IsoDE)
 IsoEBOut$Alpha
 IsoEBOut$Beta
@@ -194,8 +182,7 @@ GeneMat.norep=GeneMat[,c(1,6)]
 Sizes.norep=MedianNorm(GeneMat.norep)
 EBOut.norep=EBTest(Data=GeneMat.norep,
 			 Conditions=as.factor(rep(c("C1","C2"))),sizeFactors=Sizes.norep, maxround=5)
-PP.norep=GetPPMat(EBOut.norep)
-DEfound.norep=rownames(PP.norep)[which(PP.norep[,"PPDE"]>=.95)]
+DE.norep=GetDEResults(EBOut.norep)
 GeneFC.norep=PostFC(EBOut.norep)
 
 
@@ -210,8 +197,7 @@ IsoMat.norep=IsoMat[,c(1,6)]
 IsoSizes.norep=MedianNorm(IsoMat.norep)
 IsoEBOut.norep=EBTest(Data=IsoMat.norep, NgVector=IsoNgTrun,
 				Conditions=as.factor(c("C1","C2")),sizeFactors=IsoSizes.norep, maxround=5)
-IsoPP.norep=GetPPMat(IsoEBOut.norep)
-IsoDE.norep=rownames(IsoPP.norep)[which(IsoPP.norep[,"PPDE"]>=.95)]
+IsoDE.norep=GetDEResults(IsoEBOut.norep)
 IsoFC.norep=PostFC(IsoEBOut.norep)
 
 

@@ -1,4 +1,4 @@
-%\VignetteIndexEntry{EBSeq}
+%\VignetteIndexEntry{EBSeq Vignette}
 
 \documentclass{article}
 \usepackage{fullpage}
@@ -236,21 +236,25 @@ Please note this may take several minutes:
 EBOut=EBTest(Data=GeneMat, 
 Conditions=as.factor(rep(c("C1","C2"),each=5)),sizeFactors=Sizes, maxround=5)
 @
-\noindent The posterior probabilities of being DE are obtained as follows, where \verb+PP+ is a matrix containing the posterior probabilities of
-being EE or DE for each of the 1,000 simulated genes:
+\noindent The list of DE genes and the posterior probabilities of being DE are obtained as follows
 <<>>=
-PP=GetPPMat(EBOut)
-str(PP)
-head(PP)
+EBDERes=GetDEResults(EBOut, FDR=0.05)
+str(EBDERes$DEfound)
+head(EBDERes$PPMat)
+str(EBDERes$Status)
 @
-\noindent The matrix \verb+PP+ contains two columns \verb+PPEE+ and \verb+PPDE+, 
+\noindent \verb+EBDERes$DEfound+ is a list of genes identified with 5\% FDR. EBSeq found
+95 genes. The matrix \verb+EBDERes$PPMat+ contains two columns \verb+PPEE+ and \verb+PPDE+, 
 corresponding to the posterior probabilities of being EE or DE for each gene. 
-\verb+PP+ may be used to form an FDR-controlled list of DE genes with a target FDR of 0.05 as follows: 
-<<>>=
-DEfound=rownames(PP)[which(PP[,"PPDE"]>=.95)]
-str(DEfound)
-@
-\noindent EBSeq found 98 DE genes in total with target FDR 0.05.
+\verb+EBDERes$Status+ contains each gene's status called by EBSeq. 
+
+\noindent Note the \verb+GetDEResults()+ was incorporated in EBSeq since version 1.7.1. 
+By using the default settings, the number of genes identified in any given analysis may 
+differ slightly from the previous version. The updated algorithm is more robust to outliers
+and transcripts with low variance. To obtain results that are comparable
+to results from earlier versions of EBSeq ($\le$ 1.7.0), a user may set
+\verb+Method="classic"+ in \verb+GetDEResults()+ function, or use the \verb+GetPPMat()+ function.
+
 
 \subsection{Isoform level DE analysis (two conditions)}
 \label{sec:startisode}
@@ -335,13 +339,24 @@ required in practice (see Section \ref{sec:detailedisodeconverge} for details).
 <<>>=
 IsoEBOut=EBTest(Data=IsoMat, NgVector=IsoNgTrun, 
 Conditions=as.factor(rep(c("C1","C2"),each=5)),sizeFactors=IsoSizes, maxround=5)
-IsoPP=GetPPMat(IsoEBOut)
-str(IsoPP)
-head(IsoPP)
-IsoDE=rownames(IsoPP)[which(IsoPP[,"PPDE"]>=.95)]
-str(IsoDE)
+IsoEBDERes=GetDEResults(IsoEBOut, FDR=0.05)
+str(IsoEBDERes$DEfound)
+head(IsoEBDERes$PPMat)
+str(IsoEBDERes$Status)
 @
-\noindent We see that EBSeq found 105 DE isoforms at the target FDR of 0.05. 
+\noindent We see that EBSeq found 104 DE isoforms at the target FDR of 0.05. 
+
+\noindent Note the \verb+GetDEResults()+ was incorporated in EBSeq since version 1.7.1.
+By using the default settings, the number of transcripts identified in any given analysis may 
+differ slightly from the previous version. The updated algorithm is more robust to outliers
+and transcripts with low variance. To obtain results that are comparable
+to results from earlier versions of EBSeq ($\le$ 1.7.0), a user may set
+\verb+Method="classic"+ in \verb+GetDEResults()+ function, or use the \verb+GetPPMat()+ function.
+
+
+
+
+
 
 \subsection{Gene level DE analysis (more than two conditions)}
 \label{sec:startmulticond}
@@ -472,15 +487,15 @@ data(GeneMat)
 Sizes=MedianNorm(GeneMat)
 EBOut=EBTest(Data=GeneMat, 
 Conditions=as.factor(rep(c("C1","C2"),each=5)),sizeFactors=Sizes, maxround=5)
-PP=GetPPMat(EBOut)
+EBDERes=GetDEResults(EBOut, FDR=0.05)
 @
 <<>>=
-str(PP)
-head(PP)
-DEfound=rownames(PP)[which(PP[,"PPDE"]>=.95)]
-str(DEfound)
+EBDERes=GetDEResults(EBOut, FDR=0.05)
+str(EBDERes$DEfound)
+head(EBDERes$PPMat)
+str(EBDERes$Status)
 @
-\noindent EBSeq found 98 DE genes at a target FDR of 0.05.\\
+\noindent EBSeq found 95 DE genes at a target FDR of 0.05.\\
 
 \subsubsection{Calculating FC}
 \label{sec:detailedgenedefc}
@@ -634,13 +649,12 @@ EBSeq can be applied as described in Section \ref{sec:startisoderun}.
 IsoSizes=MedianNorm(IsoMat)
 IsoEBOut=EBTest(Data=IsoMat, NgVector=IsoNgTrun, 
 Conditions=as.factor(rep(c("C1","C2"),each=5)),sizeFactors=IsoSizes, maxround=5)
-IsoPP=GetPPMat(IsoEBOut)
-IsoDE=rownames(IsoPP)[which(IsoPP[,"PPDE"]>=.95)]
+IsoEBDERes=GetDEResults(IsoEBOut, FDR=0.05)
 @
 <<>>=
-str(IsoDE)
+str(IsoEBDERes)
 @
-\noindent We see that EBSeq found 105 DE isoforms at a target FDR of 0.05. 
+\noindent We see that EBSeq found 104 DE isoforms at a target FDR of 0.05. 
 The function \verb+PostFC+ could also be used here to calculate the Fold Change (FC) 
 as well as the posterior FC on the normalization factor adjusted data.
 <<>>=
@@ -922,7 +936,7 @@ This approach works well when there are no more than 50\% DE genes in the data s
 
 To generate a data set with no replicates, we take the first sample of each condition. 
 For example, using the data from Section \ref{sec:detailedgenede}, we take sample 1 from condition 1 and 
-sample 6 from condition 2. Functions \verb+MedianNorm+, \verb+GetPPMat+ and 
+sample 6 from condition 2. Functions \verb+MedianNorm+, \verb+GetDEResults+ and 
 \verb+PostFC+ may be used on data without replicates.
 <<>>=
 data(GeneMat)
@@ -931,8 +945,7 @@ Sizes.norep=MedianNorm(GeneMat.norep)
 EBOut.norep=EBTest(Data=GeneMat.norep,
 Conditions=as.factor(rep(c("C1","C2"))),
 sizeFactors=Sizes.norep, maxround=5)
-PP.norep=GetPPMat(EBOut.norep)
-DEfound.norep=rownames(PP.norep)[which(PP.norep[,"PPDE"]>=.95)]
+EBDERes.norep=GetDEResults(EBOut.norep)
 GeneFC.norep=PostFC(EBOut.norep)
 @
 
@@ -955,8 +968,7 @@ IsoSizes.norep=MedianNorm(IsoMat.norep)
 IsoEBOut.norep=EBTest(Data=IsoMat.norep, NgVector=IsoNgTrun,
 Conditions=as.factor(c("C1","C2")),
 sizeFactors=IsoSizes.norep, maxround=5)
-IsoPP.norep=GetPPMat(IsoEBOut.norep)
-IsoDE.norep=rownames(IsoPP.norep)[which(IsoPP.norep[,"PPDE"]>=.95)]
+IsoEBDERes.norep=GetDEResults(IsoEBOut.norep)
 IsoFC.norep=PostFC(IsoEBOut.norep)
 @
 
@@ -1040,12 +1052,34 @@ proofreading the vignette.
 low expressed genes (genes whose 75th quantile of normalized counts is less
 than 10) before identifying DE genes.
 These two thresholds can be changed in EBTest function.
-We found that low expressed genes are more easily to be affected by noises.
-Removing these genes prior to downstream analyses can improve the
-model fitting and reduce impacts of noisy genes (e.g. genes with outliers).
+Because low expressed genes are disproportionately noisy, 
+removing these genes prior to downstream analyses can improve model fitting and increase robustness
+(e.g. by removing outliers).
 
 2014-5-22: In EBSeq 1.5.2, numerical approximations are implemented to deal with
 underflow. The underflow is likely due to large number of samples.
+
+2015-1-29: In EBSeq 1.7.1, EBSeq incorporates a new function
+GetDEResults() which may be used to obtain a list of transcripts under a target FDR in a two-condition experiment.
+The results obtained by applying this function with its default setting will be
+more robust to transcripts with low variance and potential outliers.
+By using the default settings in this function,
+the number of genes identified in any given analysis may
+differ slightly from the previous version (1.7.0 or order). 
+To obtain results that are comparable
+to results from earlier versions of EBSeq (1.7.0 or older), a user may set
+Method="classic" in GetDEResults() function, or use the original GetPPMat() function.
+The GeneDEResults() function also allows a user to modify thresholds to
+target genes/isoforms with a pre-specified posterior fold change.
+
+Also, in EBSeq 1.7.1, the default settings in EBTest() and EBMultiTest() function
+will only remove transcripts with all 0's (instead of removing transcripts with 
+75th quantile less than 10 in version 1.3.3-1.7.0).
+To obtain a list of transcripts comparable to the results generated by     EBSeq version 1.3.3-1.7.0, a user may change Qtrm = 0.75 and QtrmCut = 10
+when applying EBTest() or EBMultiTest() function.
+
+
+
 \pagebreak
 \bibliographystyle{plain}
 \bibliography{lengetal}

@@ -1,5 +1,5 @@
 EBMultiTest <-
-function(Data,NgVector=NULL,Conditions,AllParti=NULL, sizeFactors, maxround,  Pool=F, NumBin=1000, ApproxVal=10^-10,PoolLower=.25, PoolUpper=.75,Print=T,Qtrm=.75,QtrmCut=10)
+function(Data,NgVector=NULL,Conditions,AllParti=NULL, sizeFactors, maxround,  Pool=F, NumBin=1000, ApproxVal=10^-10,PoolLower=.25, PoolUpper=.75,Print=T,Qtrm=1,QtrmCut=0)
 {
  if(!is.factor(Conditions))Conditions=as.factor(Conditions)
  if(is.null(rownames(Data)))stop("Please add gene/isoform names to the data matrix")
