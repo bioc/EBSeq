@@ -1,4 +1,11 @@
 
+CHANGES IN VERSION 1.9.3
+------------------------
+
+
+    o Correct typos in GetDEResults help file.
+    o Include an additional method for normalization. 
+	
 CHANGES IN VERSION 1.9.2
 ------------------------
 
