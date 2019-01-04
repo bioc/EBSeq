@@ -1,7 +1,7 @@
 Package: EBSeq
 Type: Package
 Title:An R package for gene and isoform differential expression analysis of RNA-seq data 
-Version: 1.22.0
+Version: 1.22.1
 Date: 2015-12-8
 Author: Ning Leng, Christina Kendziorski
 Maintainer: Ning Leng <lengning1@gmail.com>
@@ -17,5 +17,5 @@ Collate: 'MedianNorm.R' 'GetNg.R' 'beta.mom.R' 'f0.R' 'f1.R'
         'crit_fun.R' 'DenNHist.R' 'GetNormalizedMat.R' 'PlotPattern.R'
         'PolyFitPlot.R' 'QQP.R' 'QuantileNorm.R' 'RankNorm.R' 'GetDEResults.R'
 BuildVignettes: yes
-biocViews: StatisticalMethod, DifferentialExpression,
+biocViews: ImmunoOncology, StatisticalMethod, DifferentialExpression,
         MultipleComparison, RNASeq, Sequencing
