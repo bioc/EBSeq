@@ -1,21 +1,38 @@
 Package: EBSeq
 Type: Package
-Title:An R package for gene and isoform differential expression analysis of RNA-seq data 
-Version: 1.41.1
+Title: An R package for gene and isoform differential expression
+        analysis of RNA-seq data
+Version: 1.99.0
 Date: 2015-12-8
-Author: Ning Leng, Christina Kendziorski
-Maintainer: Ning Leng <lengning1@gmail.com> Xiuyu Ma <watsonforfun@gmail.com>
+Authors@R: c(person("Xiuyu", "Ma", email = "watsonforfun@gmail.com", role = c("cre", "aut")), 
+	person("Ning", "Leng", email = "lengning1@gmail.com", role = c("aut")),
+	person("Christina", "Kendziorski", email = "kendzior@biostat.wisc.edu", role = c("ctb")),
+	person("Michael A.", "Newton", email = "newton@stat.wisc.edu", role = c("ctb")))
 Depends: blockmodeling, gplots, testthat, R (>= 3.0.0)
 Description: Differential Expression analysis at both gene and isoform
         level using RNA-seq data
 License: Artistic-2.0
 LazyLoad: yes
-Collate: 'MedianNorm.R' 'GetNg.R' 'beta.mom.R' 'f0.R' 'f1.R'
-        'Likefun.R' 'LogN.R' 'LogNMulti.R' 'LikefunMulti.R' 'EBTest.R'
-        'GetPatterns.R' 'EBMultiTest.R' 'GetPP.R' 'PostFC.R'
+Collate: 'MedianNorm.R' 'GetNg.R' 'beta.mom.R' 
+          'EBTest.R'
+        'GetPatterns.R' 'EBMultiTest.R' 'PostFC.R'
         'GetPPMat.R' 'GetMultiPP.R' 'GetMultiFC.R' 'PlotPostVsRawFC.R'
         'crit_fun.R' 'DenNHist.R' 'GetNormalizedMat.R' 'PlotPattern.R'
-        'PolyFitPlot.R' 'QQP.R' 'QuantileNorm.R' 'RankNorm.R' 'GetDEResults.R'
-BuildVignettes: yes
+        'PolyFitPlot.R' 'QQP.R' 'QuantileNorm.R' 'RankNorm.R'
+        'GetDEResults.R' 'EBSeqTest.R' 'Likefun.R' 'LikefunMulti.R'
+	'LogN.R' 'LogNMulti.R' 'f0.R' 'f1.R' 'GetSelectedPatterns.R'
+BuildVignettes: no
+Imports: Rcpp (>= 0.12.11), RcppEigen (>= 0.3.2.9.0)
+LinkingTo: Rcpp,RcppEigen,BH
+SystemRequirements: c++11
+Roxygen: list(wrap=FALSE)
+RoxygenNote: 7.1.0
 biocViews: ImmunoOncology, StatisticalMethod, DifferentialExpression,
         MultipleComparison, RNASeq, Sequencing
+git_url: https://github.com/wiscstatman/EBSeq
+git_branch: RELEASE_3_9
+git_last_commit: f0aec48
+git_last_commit_date: 2019-05-02
+Date/Publication: 2019-05-02
+NeedsCompilation: no
+Packaged: 2019-05-03 00:43:56 UTC; biocbuild
