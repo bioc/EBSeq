@@ -8,8 +8,9 @@
 %\usepackage{listings}
 \usepackage{moreverb}
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 \title{EBSeq: An R package for differential expression analysis using RNA-seq data}
-\author{Ning Leng, John Dawson, and Christina Kendziorski}
+\author{Ning Leng, John Dawson, Xiuyu Ma, Michael A. Newton, and Christina Kendziorski}
 \maketitle
 \tableofcontents
 \setcounter{tocdepth}{2}
@@ -39,8 +40,10 @@ false discoveries in the $I_g=2$ and $I_g=3$ groups (since the true variances ar
 than those derived from the full collection). EBSeq directly models differential variability
 as a function of $I_g$ providing a powerful approach for isoform level inference. As shown in Leng {\it et al.}, 2013
 \cite{Leng13}, the model is also useful for identifying DE genes.
+One bottleneck of the model is that the number of DE patterns is growing factorially with the number of conditions($K$) for comparison (Bell number), which makes the computation infeasible for big $K$. To solve such issue, in EBSeq.2, we provide a pruning scheme by removing those unlikely patterns and thus greatly reducing the size of patterns, we also utilize a one-step EM for the hyper parameters optimization and rewrite the code in C++ for further efficiency.
 We will briefly detail the model in Section \ref{sec:model} and then describe
 the flow of analysis in Section \ref{sec:quickstart} for both isoform and gene-level inference.
+
 
 \begin{figure}[t]
 \centering
@@ -233,8 +236,10 @@ additional iterations are usually required. Convergence should always be
 checked (see Section \ref{sec:detailedgenedeconverge} for details).
 Please note this may take several minutes:
 <<>>=
-EBOut=EBTest(Data=GeneMat, 
-Conditions=as.factor(rep(c("C1","C2"),each=5)),sizeFactors=Sizes, maxround=5)
+#EBOut=EBTest(Data=GeneMat, 
+#Conditions=as.factor(rep(c("C1","C2"),each=5)),sizeFactors=Sizes, maxround=5)
+EBOut = EBTest(Data=GeneMat, Conditions=as.factor(rep(c("C1","C2"),each=5)),
+       sizeFactors = Sizes)
 @
 \noindent The list of DE genes and the posterior probabilities of being DE are obtained as follows
 <<>>=
@@ -337,8 +342,8 @@ in the gene level analysis, we advise that additional iterations will likely be
 required in practice (see Section \ref{sec:detailedisodeconverge} for details). 
 
 <<>>=
-IsoEBOut=EBTest(Data=IsoMat, NgVector=IsoNgTrun, 
-Conditions=as.factor(rep(c("C1","C2"),each=5)),sizeFactors=IsoSizes, maxround=5)
+IsoEBOut = EBTest(Data=IsoMat, NgVector=IsoNgTrun, 
+Conditions=as.factor(rep(c("C1","C2"),each=5)),sizeFactors=IsoSizes)
 IsoEBDERes=GetDEResults(IsoEBOut, FDR=0.05)
 str(IsoEBDERes$DEfound)
 head(IsoEBDERes$PPMat)
@@ -373,30 +378,41 @@ In analysis where the data are spread over more than two conditions,
 the set of possible patterns for each gene is more complicated
 than simply EE and DE. As noted in Section \ref{sec:model}, when we have 3 conditions, there are 5 expression
 patterns to consider. In the simulated data, we have 6 samples, 2 in each of 3 conditions.
-The function \verb+GetPatterns+ allows the user to generate all possible patterns given the conditions. For example:
-
 <<>>=
 Conditions=c("C1","C1","C2","C2","C3","C3")
-PosParti=GetPatterns(Conditions)
-PosParti
 @
 
-\noindent where the first row means all three conditions have the same latent mean expression level; 
-the second row means C1 and C2 have the same latent mean expression level but that of C3 is different; 
-and the last row corresponds to the case where the three conditions all have different latent mean expression levels.
-The user may use all or only some of these possible patterns as an input to \verb+EBMultiTest+.
-For example, if we were interested in Patterns 1, 2, 4 and 5 only, we'd define:
-<<>>=
-Parti=PosParti[-3,]
-Parti
-@
-
-Moving on to the analysis, \verb+MedianNorm+ or one of its competitors should be used to determine the normalization factors.
+\verb+MedianNorm+ or one of its competitors should be used to determine the normalization factors.
 Once this is done, the formal test is performed by \verb+EBMultiTest+. 
 <<>>=
 MultiSize=MedianNorm(MultiGeneMat)
-MultiOut=EBMultiTest(MultiGeneMat,NgVector=NULL,Conditions=Conditions,
-AllParti=Parti, sizeFactors=MultiSize, maxround=5)
+MultiOut=EBMultiTest(MultiGeneMat,Conditions=Conditions,
+ sizeFactors=MultiSize)
+@
+The function \verb+GetSelectedPatterns+ allows the user to get selected patterns. For example:
+<<>>=
+PosParti=GetSelectedPatterns(MultiOut)
+PosParti
+@
+\noindent where the first row means all three conditions have distinct latent mean expression level; 
+the second row means C1 and C2 have the same latent mean expression level but that of C3 is different; 
+and the last row corresponds to the case where C1 and C3 have the same latent mean expression level but that of C2 is different. The user
+may use all or only some of these possible patterns as an input to \verb+EBMultiTest+.
+The function \verb+GetPatterns+ allows the user to generate all possible patterns given the conditions.
+For example:
+<<>>=
+PosParti = GetPatterns(Conditions)
+PosParti
+@
+if we were interested in Patterns 1, 2, 4 and 5 only, we'd define:
+<<>>=
+Parti = PosParti[-3,]
+Parti
+@
+and use the \verb+AllParti+ argument to input the user specified subset of partitions 
+<<>>=
+MultiOut=EBMultiTest(MultiGeneMat,Conditions=Conditions,
+ sizeFactors=MultiSize,AllParti=Parti)
 @
 \noindent The posterior probability of being in each pattern for every gene is obtained by using the 
 function \verb+GetMultiPP+:
@@ -434,30 +450,25 @@ NgList.Multi=GetNg(IsoNames.Multi, IsosGeneNames.Multi)
 IsoNgTrun.Multi=NgList.Multi$IsoformNgTrun
 Conditions=c("C1","C1","C2","C2","C3","C3","C4","C4")
 @
-Here we have 4 conditions, there are 15 expression
-patterns to consider. 
-The function \verb+GetPatterns+ allows the user to generate all possible patterns given the conditions. For example:
 
-<<>>=
-PosParti.4Cond=GetPatterns(Conditions)
-PosParti.4Cond
-@
 
-\noindent 
-If we were interested in Patterns 1, 2, 3, 8 and 15 only, we'd define:
-<<>>=
-Parti.4Cond=PosParti.4Cond[c(1,2,3,8,15),]
-Parti.4Cond
-@
 
 \noindent
-Moving on to the analysis, \verb+EBMultiTest+ could be used to perform the test:
+\verb+EBMultiTest+ could be used to perform the test:
 <<>>=
 IsoMultiOut=EBMultiTest(IsoMultiMat,
 NgVector=IsoNgTrun.Multi,Conditions=Conditions,
-AllParti=Parti.4Cond, sizeFactors=IsoMultiSize, 
-maxround=5)
+sizeFactors=IsoMultiSize, 
+nequal = 10)
 @
+
+The function \verb+GetSelectedPatterns+ allows the user to get selected patterns. For example:
+
+<<>>=
+PosParti.4Cond=GetSelectedPatterns(IsoMultiOut)
+PosParti.4Cond
+@
+
 \noindent The posterior probability of being in each pattern for every gene is obtained by using the 
 function \verb+GetMultiPP+:
 <<>>=
@@ -486,7 +497,7 @@ EBSeq is applied as described in Section \ref{sec:startgenederun}.
 data(GeneMat)
 Sizes=MedianNorm(GeneMat)
 EBOut=EBTest(Data=GeneMat, 
-Conditions=as.factor(rep(c("C1","C2"),each=5)),sizeFactors=Sizes, maxround=5)
+Conditions=as.factor(rep(c("C1","C2"),each=5)),sizeFactors=Sizes)
 EBDERes=GetDEResults(EBOut, FDR=0.05)
 @
 <<>>=
@@ -495,7 +506,7 @@ str(EBDERes$DEfound)
 head(EBDERes$PPMat)
 str(EBDERes$Status)
 @
-\noindent EBSeq found 95 DE genes at a target FDR of 0.05.\\
+\noindent EBSeq found 94 DE genes at a target FDR of 0.05.\\
 
 \subsubsection{Calculating FC}
 \label{sec:detailedgenedefc}
@@ -525,15 +536,14 @@ are minor.
 As detailed in Section \ref{sec:model}, we assume the prior distribution of $q_g^C$ is 
 $Beta(\alpha,\beta)$. The EM algorithm is used to estimate the 
 hyper-parameters $\alpha,\beta$ and the mixture parameter $p$. 
-The optimized parameters at each iteration may be obtained as follows (recall
-we are using 5 iterations for demonstration purposes): 
+The optimized parameters may be obtained as follows : 
 <<>>=
 EBOut$Alpha
-EBOut$Beta
+EBOut$Beta[1:5]
 EBOut$P
 @
-In this case the differences between the 4th and 5th iterations are always less 
-than 0.01.
+
+The one-step EM will stop if the difference between the objectives(marginal likelihood) at two iterations is smaller than the \verb+stopthre+ (default as 1e-4) or the \verb+maxround+(default as 50) number of iterations has been reached. 
 
 
 \subsubsection{Checking the model fit and other diagnostics}
@@ -645,10 +655,10 @@ could also be used to form the uncertainty clusters.
 \subsubsection{Running EBSeq on simulated isoform expression estimates}
 \label{sec:detailedisoderun}
 EBSeq can be applied as described in Section \ref{sec:startisoderun}.
-<<eval=FALSE>>=
+<<eval=TRUE>>=
 IsoSizes=MedianNorm(IsoMat)
 IsoEBOut=EBTest(Data=IsoMat, NgVector=IsoNgTrun, 
-Conditions=as.factor(rep(c("C1","C2"),each=5)),sizeFactors=IsoSizes, maxround=5)
+Conditions=as.factor(rep(c("C1","C2"),each=5)),sizeFactors=IsoSizes,step2 = 1e-4)
 IsoEBDERes=GetDEResults(IsoEBOut, FDR=0.05)
 @
 <<>>=
@@ -667,18 +677,17 @@ str(IsoFC)
 \label{sec:detailedisodeconverge}
 For isoform level data, we assume the prior distribution of $q_{gi}^C$ is
 $Beta(\alpha,\beta^{I_g})$.
-As in Section \ref{sec:detailedgenedeconverge}, the optimized parameters at each iteration 
-may be obtained as follows (recall
-we are using 5 iterations for demonstration purposes): 
+As in Section \ref{sec:detailedgenedeconverge}, the optimized parameters 
+may be obtained as follows: 
 <<>>=
 IsoEBOut$Alpha
-IsoEBOut$Beta
+unique(IsoEBOut$Beta)
 IsoEBOut$P
 @
 Here we have 3 $\beta$'s in each iteration corresponding to 
 $\beta^{I_g=1},\beta^{I_g=2},\beta^{I_g=3}$.
-We see that parameters are changing less than $10^{-2}$ or $10^{-3}$.
-In practice, we require changes less than $10^{-3}$ to declare convergence.
+
+The one-step EM will stop if the difference between the objectives(marginal likelihood) at two iterations is smaller than the \verb+stopthre+ (default as 1e-4) or the \verb+maxround+(default as 50) number of iterations has been reached. 
 
 \subsubsection{Checking the model fit and other diagnostics}
 \label{sec:detailedisodeplot}
@@ -689,15 +698,18 @@ isoform groups defined by truncated $I_g$ (such as those shown here
 in Figure 1), the function \verb+PolyFitPlot+ may be used. 
 The following code generates the three
 panels shown in Figure \ref{fig:IsoSimuNgEach}
-(if condition 2 is of interest, a user could change each \verb+C1+ to \verb+C2+.):
+(if condition 2 is of interest, a user could change each \verb+group = 1 + to \verb+group = 2+.):
 \begin{figure}[h!]
 \centering
 <<fig=TRUE>>=
 par(mfrow=c(2,2))
 PolyFitValue=vector("list",3)
-for(i in 1:3)
-    PolyFitValue[[i]]=PolyFitPlot(IsoEBOut$C1Mean[[i]], 
-    IsoEBOut$C1EstVar[[i]],5)
+for(i in 1:3){
+  group = 1
+  PolyFitValue[[i]]=PolyFitPlot(IsoEBOut$Mean[which(IsoEBOut$Iso == i),group], 
+    IsoEBOut$Var[which(IsoEBOut$Iso == i),group],5)
+}
+    
 @
 \caption{ The mean-variance fitting plot for each Ng group}
 \label{fig:IsoSimuNgEach}
@@ -711,12 +723,15 @@ here in Figure \ref{fig:IsoSimuNg}), which is similar in structure to Figure 1:
 \begin{figure}[h!]
 \centering
 <<fig=TRUE>>=
-PolyAll=PolyFitPlot(unlist(IsoEBOut$C1Mean), unlist(IsoEBOut$C1EstVar),5)
-lines(log10(IsoEBOut$C1Mean[[1]][PolyFitValue[[1]]$sort]), 
+group = 1
+X = IsoEBOut$Mean[,group]
+Y = IsoEBOut$Var[,group]
+PolyAll=PolyFitPlot(X, Y,5)
+lines(log10(X[which(IsoEBOut$Iso == 1)][PolyFitValue[[1]]$sort]), 
 PolyFitValue[[1]]$fit[PolyFitValue[[1]]$sort],col="yellow",lwd=2)
-lines(log10(IsoEBOut$C1Mean[[2]][PolyFitValue[[2]]$sort]), 
+lines(log10(X[which(IsoEBOut$Iso == 2)][PolyFitValue[[2]]$sort]), 
 PolyFitValue[[2]]$fit[PolyFitValue[[2]]$sort],col="pink",lwd=2)
-lines(log10(IsoEBOut$C1Mean[[3]][PolyFitValue[[3]]$sort]), 
+lines(log10(X[which(IsoEBOut$Iso == 3)][PolyFitValue[[3]]$sort]), 
 PolyFitValue[[3]]$fit[PolyFitValue[[3]]$sort],col="green",lwd=2)
 legend("topleft",c("All Isoforms","Ng = 1","Ng = 2","Ng = 3"),
 col=c("red","yellow","pink","green"),lty=1,lwd=3,box.lwd=2)
@@ -759,38 +774,16 @@ Better fitting should be expected while using full set of isoforms.)}
 \clearpage
 \subsection{Gene level DE analysis (more than two conditions)}
 \label{sec:detailedmulticond}
-As described in Section \ref{sec:startmulticond}, 
-the function \verb+GetPatterns+ allows the user to generate all possible patterns given the conditions.
-To visualize the patterns, the function \verb+PlotPattern+ may be used.
-
-\begin{figure}[h!]
-\centering
-<<fig=TRUE>>=
-Conditions=c("C1","C1","C2","C2","C3","C3")
-PosParti=GetPatterns(Conditions)
-PosParti
-PlotPattern(PosParti)
-@
-\caption{ All possible patterns}
-\label{fig:Patterns}
-\end{figure}
-\newpage
-\noindent If we were interested in Patterns 1, 2, 4 and 5 only, we'd define:
-<<>>=
-Parti=PosParti[-3,]
-Parti
-@
-
 \noindent 
-Moving on to the analysis, \verb+MedianNorm+ or one of its competitors should be used to determine the normalization factors.
+\verb+MedianNorm+ or one of its competitors should be used to determine the normalization factors.
 Once this is done, the formal test is performed by \verb+EBMultiTest+. 
 <<eval=FALSE>>=
 data(MultiGeneMat)
+Conditions=c("C1","C1","C2","C2","C3","C3")
 MultiSize=MedianNorm(MultiGeneMat)
 MultiOut=EBMultiTest(MultiGeneMat,
 NgVector=NULL,Conditions=Conditions,
-AllParti=Parti, sizeFactors=MultiSize, 
-maxround=5)
+sizeFactors=MultiSize)
 @
 \noindent The posterior probability of being in each pattern for every gene is obtained using the 
 function \verb+GetMultiPP+:
@@ -801,6 +794,21 @@ MultiPP$PP[1:10,]
 MultiPP$MAP[1:10]
 MultiPP$Patterns
 @
+As described in Section \ref{sec:startmulticond}, 
+the function \verb+GetSelectedPatterns+ allows the user to get selected patterns after we run the \verb+EBMultiTest+ function
+To visualize the patterns, the function \verb+PlotPattern+ may be used.
+
+\begin{figure}[h!]
+\centering
+<<fig=TRUE>>=
+PosParti=GetSelectedPatterns(MultiOut)
+PosParti
+PlotPattern(PosParti)
+@
+\caption{ Selected patterns, for this case, happens to be all possible patterns for 3 conditions}
+\label{fig:Patterns}
+\end{figure}
+\newpage
 \noindent where \verb+MultiPP$PP+ provides the posterior probability of being in each pattern for every gene. 
 \verb+MultiPP$MAP+ provides the most likely pattern of each gene based on the posterior 
 probabilities. \verb+MultiPP$Patterns+ provides the details of the patterns.  The FC and posterior FC for multiple condition data can
@@ -841,29 +849,10 @@ Better fitting should be expected while using full set of genes.)}
 \newpage
 \subsection{Isoform level DE analysis (more than two conditions)}
 \label{sec:detailedisomulticond}
-Similar to Section \ref{sec:startmulticond}, 
-the function \verb+GetPatterns+ allows a user to generate all possible patterns given the conditions.
-To visualize the patterns, the function \verb+PlotPattern+ may be used.
-<<>>=
-Conditions=c("C1","C1","C2","C2","C3","C3","C4","C4")
-PosParti.4Cond=GetPatterns(Conditions)
-PosParti.4Cond
-@
-\newpage
-\begin{figure}[h!]
-\centering
-<<fig=TRUE>>=
-PlotPattern(PosParti.4Cond)
-Parti.4Cond=PosParti.4Cond[c(1,2,3,8,15),]
-Parti.4Cond
-@
-\caption{All possible patterns for 4 conditions}
-\label{fig:Patterns4Cond}
-\end{figure}
 
-\newpage
 <<eval=FALSE>>=
 data(IsoMultiList)
+Conditions=c("C1","C1","C2","C2","C3","C3","C4","C4")
 IsoMultiMat=IsoMultiList[[1]]
 IsoNames.Multi=IsoMultiList$IsoNames
 IsosGeneNames.Multi=IsoMultiList$IsosGeneNames
@@ -871,8 +860,7 @@ IsoMultiSize=MedianNorm(IsoMultiMat)
 NgList.Multi=GetNg(IsoNames.Multi, IsosGeneNames.Multi)
 IsoNgTrun.Multi=NgList.Multi$IsoformNgTrun
 IsoMultiOut=EBMultiTest(IsoMultiMat,NgVector=IsoNgTrun.Multi,Conditions=Conditions,
-AllParti=Parti.4Cond, 
-sizeFactors=IsoMultiSize, maxround=5)
+sizeFactors=IsoMultiSize)
 IsoMultiPP=GetMultiPP(IsoMultiOut)
 @
 <<>>=
@@ -882,6 +870,26 @@ IsoMultiPP$MAP[1:10]
 IsoMultiPP$Patterns
 IsoMultiFC=GetMultiFC(IsoMultiOut)
 @
+
+Similar to Section \ref{sec:startmulticond}, 
+the function \verb+GetSelectedPatterns+ allows a user to get selected patterns.
+To visualize the patterns, the function \verb+PlotPattern+ may be used.
+<<>>=
+PosParti.4Cond=GetSelectedPatterns(IsoMultiOut)
+PosParti.4Cond
+@
+
+\begin{figure}[h!]
+\centering
+<<fig=TRUE>>=
+PlotPattern(PosParti.4Cond)
+@
+\caption{Selected patterns for 4 conditions}
+\label{fig:Patterns4Cond}
+\end{figure}
+\newpage
+
+
 The FC and posterior FC for multiple condition data can be obtained by the function \verb+GetMultiFC+:
 
 
@@ -944,7 +952,7 @@ GeneMat.norep=GeneMat[,c(1,6)]
 Sizes.norep=MedianNorm(GeneMat.norep)
 EBOut.norep=EBTest(Data=GeneMat.norep,
 Conditions=as.factor(rep(c("C1","C2"))),
-sizeFactors=Sizes.norep, maxround=5)
+sizeFactors=Sizes.norep)
 EBDERes.norep=GetDEResults(EBOut.norep)
 GeneFC.norep=PostFC(EBOut.norep)
 @
@@ -967,7 +975,7 @@ IsoMat.norep=IsoMat[,c(1,6)]
 IsoSizes.norep=MedianNorm(IsoMat.norep)
 IsoEBOut.norep=EBTest(Data=IsoMat.norep, NgVector=IsoNgTrun,
 Conditions=as.factor(c("C1","C2")),
-sizeFactors=IsoSizes.norep, maxround=5)
+sizeFactors=IsoSizes.norep)
 IsoEBDERes.norep=GetDEResults(IsoEBOut.norep)
 IsoFC.norep=PostFC(IsoEBOut.norep)
 @
@@ -982,13 +990,11 @@ Example codes are shown below.
 data(MultiGeneMat)
 MultiGeneMat.norep=MultiGeneMat[,c(1,3,5)]
 Conditions=c("C1","C2","C3")
-PosParti=GetPatterns(Conditions)
-Parti=PosParti[-3,]
+#PosParti=GetPatterns(Conditions)
+#Parti=PosParti[-3,]
 MultiSize.norep=MedianNorm(MultiGeneMat.norep)
 MultiOut.norep=EBMultiTest(MultiGeneMat.norep,
-NgVector=NULL,Conditions=Conditions,
-AllParti=Parti, sizeFactors=MultiSize.norep, 
-maxround=5)
+NgVector=NULL,Conditions=Conditions, sizeFactors=MultiSize.norep)
 MultiPP.norep=GetMultiPP(MultiOut.norep)
 MultiFC.norep=GetMultiFC(MultiOut.norep)
 @
@@ -1012,14 +1018,13 @@ IsoMultiSize.norep=MedianNorm(IsoMultiMat.norep)
 NgList.Multi=GetNg(IsoNames.Multi, IsosGeneNames.Multi)
 IsoNgTrun.Multi=NgList.Multi$IsoformNgTrun
 Conditions=c("C1","C2","C3","C4")
-PosParti.4Cond=GetPatterns(Conditions)
-PosParti.4Cond
-Parti.4Cond=PosParti.4Cond[c(1,2,3,8,15),]
-Parti.4Cond
+#PosParti.4Cond=GetPatterns(Conditions)
+#PosParti.4Cond
+#Parti.4Cond=PosParti.4Cond[c(1,2,3,8,15),]
+#Parti.4Cond
 IsoMultiOut.norep=EBMultiTest(IsoMultiMat.norep,
 NgVector=IsoNgTrun.Multi,Conditions=Conditions,
-AllParti=Parti.4Cond, sizeFactors=IsoMultiSize.norep, 
-maxround=5)
+sizeFactors=IsoMultiSize.norep)
 IsoMultiPP.norep=GetMultiPP(IsoMultiOut.norep)
 IsoMultiFC.norep=GetMultiFC(IsoMultiOut.norep)
 @
@@ -1032,16 +1037,22 @@ quantification and DE testing on both gene and isoform levels.
 For more details, see 
 \url{http://deweylab.biostat.wisc.edu/rsem/README.html#de}
 
-\subsection{EBSeq interface: A user-friendly graphical interface for differetial expression analysis}
-EBSeq interface provides a graphical interface implementation for users who are not familiar with the R 
-programming language. It takes .xls, .xlsx and .csv files as input. 
-Additional packages need be downloaded; they may be found at
-\url{http://www.biostat.wisc.edu/~ningleng/EBSeq_Package/EBSeq_Interface/}
+\subsection{EBSeq.v2 reference}
+This version 2.0 update of EBSeq is the topic of bioRxiv 10.1101/2020.06.19.162180 \url{https://biorxiv.org/cgi/content/short/2020.06.19.162180v1}
+% \subsection{EBSeq interface: A user-friendly graphical interface for differetial expression analysis}
+% EBSeq interface provides a graphical interface implementation for users who are not familiar with the R 
+% programming language. It takes .xls, .xlsx and .csv files as input. 
+% Additional packages need be downloaded; they may be found at
+% \url{http://www.biostat.wisc.edu/~ningleng/EBSeq_Package/EBSeq_Interface/}
 
-\subsection{EBSeq Galaxy tool shed}
-EBSeq tool shed contains EBSeq wrappers for a local Galaxy implementation.
-For more details, see
-\url{http://www.biostat.wisc.edu/~ningleng/EBSeq_Package/EBSeq_Galaxy_toolshed/}
+%\subsection{EBSeq Galaxy tool shed}
+%EBSeq tool shed contains EBSeq wrappers for a local Galaxy implementation.
+%For more details, see
+%\url{http://www.biostat.wisc.edu/~ningleng/EBSeq_Package/EBSeq_Galaxy_toolshed/}
+
+\subsection{Scaling up EBSeq}
+There is a major update for the algorithm and code structure allowing EBSeq to deal with comparison among big number of conditions. 
+The reference paper can be found at "link to jss paper"
 
 \section{Acknowledgment}
 We would like to thank Haolin Xu for checking the package and
@@ -1077,6 +1088,24 @@ will only remove transcripts with all 0's (instead of removing transcripts with
 75th quantile less than 10 in version 1.3.3-1.7.0).
 To obtain a list of transcripts comparable to the results generated by     EBSeq version 1.3.3-1.7.0, a user may change Qtrm = 0.75 and QtrmCut = 10
 when applying EBTest() or EBMultiTest() function.
+
+In EBSeq 1.9.1 Added Q$\&$A seqction in vignette to address common questions
+
+In EBSeq 1.9.2 Fixed a bug which may cause error when input a matrix to the sizeFactors parameter
+
+In EBSeq 1.9.3 Correct typos in GetDEResults help file.
+
+Include an alternative method for normalization. The alternative method is similar to median-by-ratio normalization, 
+    	but can deal with the cases when all of the genes/isoforms have at least one zero counts (in which case the 
+    	median-by-ratio normalization will fail). This alternative method is developed for single-cell RNA-seq analysis
+    	where the dataset always contains a large amount of zeros.
+    	
+In EBSeq 1.11.1 Fixed a bug in EBTest() which may cause error when performing isoform DE testing 1 sample vs. multiple samples.
+
+
+In EBSeq 1.28.0 available on Bioconductor: https://bioconductor.org/packages/release/bioc/html/EBSeq.html
+
+2020-6-2: In EBSeq 2.0.0 A new implementation of the core functions EBTest and EBMultiTest, which scales up the computation for big number of conditions to compare. 
 
 \section{Common Q and A}
 \subsection{Read in data}
