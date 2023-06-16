@@ -1,7 +1,15 @@
 GetMultiPP <- function(EBout){
-	if(!"PPpattern"%in%names(EBout))stop("The input doesn't seem like an output from EBMultiTest")
+    if(is.null(ncol(EBout$Mean)))
+    {
+        if(length(EBout$Mean) < 3)
+            stop("The input doesn't seem like an output from EBMultiTest")
 
-	PP=EBout$PPpattern	
+    }else{
+        if(ncol(EBout$Mean) < 3)
+        stop("The input doesn't seem like an output from EBMultiTest")
+    }
+    
+	PP=EBout$PPMat
 	UnderFlow=which(is.na(rowSums(PP)))
 	if(length(UnderFlow)!=0)Good=c(1:nrow(PP))[-UnderFlow]
 	else Good=c(1:nrow(PP))
@@ -10,5 +18,6 @@ GetMultiPP <- function(EBout){
 	MAP[Good]=colnames(PP)[apply(PP[Good,],1,which.max)]
 	MAP[UnderFlow]="NoTest"
 	AllParti=EBout$AllParti
+    rownames(AllParti) = sapply(1:nrow(AllParti),function(x) paste0("Pattern",x))
 	out=list(PP=PP, MAP=MAP,Patterns=AllParti)
 }
