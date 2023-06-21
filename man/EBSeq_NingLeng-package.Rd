@@ -19,9 +19,9 @@ LazyLoad: \tab yes\cr
 }
 }
 \author{
-Ning Leng, Christina Kendziorski
+Ning Leng,Xiuyu Ma, Christina Kendziorski, Michael A. Newton
 
-Maintainer: Ning Leng  <nleng@wisc.edu>
+Maintainer: Ning Leng  <lengning1@gmail.com>> Xiuyu Ma <watsonforfun@gmail.com>
 }
 \references{
 Ning Leng, John A. Dawson, James A. Thomson, Victor Ruotti, Anna I. Rissman, Bart M.G. Smits, Jill D. Haag, Michael N. Gould, Ron M. Stewart, and Christina Kendziorski. EBSeq: An empirical Bayes hierarchical model for inference in RNA-seq experiments. Bioinformatics (2013)
