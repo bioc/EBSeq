@@ -1,3 +1,8 @@
+CHANGES IN VERSION 2.5.2
+------------------------
+    o Using c++14 for the updated [BH] (https://cran.r-project.org/web/packages/BH/index.html) dependency, and restrict BH version <= 1.87.0-1 to prevent higher version C++ requirement in the future
+
+
 CHANGES IN VERSION 2.0.0
 ------------------------
     o A new implementation of the core functions EBTest and EBMultiTest, which scales up the computation for big number of conditions to compare. 
