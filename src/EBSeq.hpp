@@ -40,6 +40,7 @@ namespace EBS
         
         void EM(size_t max_iteration, Float changeThre)
         {
+            Rcpp::Rcout << "test\n"; 
             size_t Iter = 0;
             
             Float changeRatio = 10;
@@ -64,9 +65,7 @@ namespace EBS
                     
                     first = false;
                     
-//                    Rcpp::Rcout << "Objective = " << lastOBJ << "\n";
-                    
-                    Rcpp::Rcout << "Initial number of DE patterns = " <<  DEPsize() << "\n";
+                    Rcpp::Rcout << "Number of initial selected DE patterns = " <<  DEPsize() << "\n";
                     
                     continue;
                 }
@@ -86,13 +85,10 @@ namespace EBS
                 
                 lastOBJ = getOBJ();
                 
-//                Rcpp::Rcout << "Objective = " << lastOBJ << "\n";
-                
-                
                 Iter++;
             }
             
-            Rcpp::Rcout << "Final number of DE patterns = " <<  DEPsize() << "\n";
+            Rcpp::Rcout << "Number of final selected DE patterns = " <<  DEPsize() << "\n";
         }
         
         
