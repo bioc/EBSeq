@@ -40,7 +40,6 @@ namespace EBS
         
         void EM(size_t max_iteration, Float changeThre)
         {
-            Rcpp::Rcout << "test\n"; 
             size_t Iter = 0;
             
             Float changeRatio = 10;
