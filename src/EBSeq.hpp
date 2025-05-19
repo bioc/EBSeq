@@ -63,8 +63,8 @@ namespace EBS
                     Iter++;
                     
                     first = false;
-                    
-                    Rcpp::Rcout << "Number of initial selected DE patterns = " <<  DEPsize() << "\n";
+                                        
+                    Rcpp::Rcout << "Initial number of DE patterns = " <<  DEPsize() << "\n";
                     
                     continue;
                 }
@@ -82,12 +82,12 @@ namespace EBS
                     changeRatio = -changeRatio;
                 }
                 
-                lastOBJ = getOBJ();
+                lastOBJ = getOBJ();                
                 
                 Iter++;
             }
             
-            Rcpp::Rcout << "Number of final selected DE patterns = " <<  DEPsize() << "\n";
+            Rcpp::Rcout << "Final number of DE patterns = " <<  DEPsize() << "\n";
         }
         
         
