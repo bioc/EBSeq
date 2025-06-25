@@ -7,7 +7,11 @@
 #include <boost/math/special_functions/gamma.hpp>
 #include <boost/math/special_functions/digamma.hpp>
 #include <set>
-//#include <tbb/tbb.h>
+#ifdef _OPENMP
+  #include <omp.h>
+#endif
+
+// [[Rcpp::plugins(openmp)]]
 
 namespace EBS
 {
@@ -296,7 +300,13 @@ namespace EBS
             _p.resize(n);
             
             _p.fill(1.0 / n);
-            
+
+            #ifdef _OPENMP
+                std::cout << "OpenMP is enabled." << std::endl;
+                std::cout << "Using " << omp_get_max_threads() << " threads." << std::endl;
+            #else
+                std::cout << "OpenMP is NOT enabled." << std::endl;
+            #endif
         }
         
         inline Float lbeta(Float x,Float y)
@@ -723,7 +733,8 @@ namespace EBS
         {
             // adjust dim of kernel matrix
             _kernel.resize(_sum.rows(),_pat.size());
-            
+
+            #pragma omp parallel for
             for(size_t i = 0; i < _pat.size(); i++)
             {
                 COUNTS _csum = _sum * _pat[i];
@@ -755,7 +766,8 @@ namespace EBS
             COUNTS alpDRV(G,npat);
 
             COUNTS betaDRV(G,npat);
-	
+
+            #pragma omp parallel for
             for(size_t i = 0; i < npat; i++)
             {
                 COUNTS _csum = _sum * _pat[i];
@@ -845,7 +857,6 @@ namespace EBS
             COUNTS div = total * _p.transpose();
             
             _post = (_post.array() * div.array()).matrix();
-            
         }
         
         void updateP()
