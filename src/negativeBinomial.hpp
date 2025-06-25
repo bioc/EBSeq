@@ -738,7 +738,7 @@ namespace EBS
                 
                 res = (res.array() - boost::math::lgamma(_alpha)).matrix();
                 
-                res =  res.colwise() - (_beta.unaryExpr<Float(*)(Float)>(&boost::math::lgamma) + (_alpha + _beta.array()).matrix().unaryExpr<Float(*)(Float)>(&boost::math::lgamma));
+                res =  res.colwise() - (_beta.unaryExpr<Float(*)(Float)>(&boost::math::lgamma) - (_alpha + _beta.array()).matrix().unaryExpr<Float(*)(Float)>(&boost::math::lgamma));
     
                 _kernel.col(i) = res.rowwise().sum();
                 
