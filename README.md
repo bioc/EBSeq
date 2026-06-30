@@ -132,3 +132,15 @@ its FC and PostFC will both be 5. If gene2 has mean1 = 5 and mean2 =
 1, its FC will be 5 but its PostFC will be < 5 and closer to 1.
 Therefore when we sort the PostFC, gene2 will be less significant than
 gene1.
+
+
+# OpenMP Parallelization for Speed-Up
+
+OpenMP parallelization is supported on Linux systems and on macOS when the OpenMP runtime library is available. This can substantially accelerate computations, especially for gene-level parallel operations.
+
+On Linux, OpenMP is enabled automatically during package installation when supported by the system compiler.
+
+On macOS, EBSeq will enable OpenMP if `libomp` is installed. To enable parallel execution on macOS, install `libomp` before installing EBSeq:
+
+```bash
+brew install libomp
